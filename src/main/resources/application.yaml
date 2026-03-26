@@ -1,5 +1,26 @@
 server:
   forward-headers-strategy: framework
+
 spring:
   application:
     name: recruitment
+
+  datasource:
+    url: jdbc:h2:file:./data/recruitment
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true

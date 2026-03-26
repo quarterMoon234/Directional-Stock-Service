@@ -32,12 +32,15 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // database
+    developmentOnly("org.springframework.boot:spring-boot-h2console")
     runtimeOnly("com.h2database:h2")
 
     // querydsl
     implementation("io.github.openfeign.querydsl:querydsl-jpa:7.1")
     ksp("io.github.openfeign.querydsl:querydsl-ksp-codegen:7.1")
 
+    // swagger-ui
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
     // test
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
