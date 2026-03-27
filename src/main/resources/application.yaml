@@ -24,3 +24,9 @@ spring:
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
+
+directional:
+  price-api:
+    base-url: https://api-recruitment.directional.net
+    username: ${DIRECTIONAL_API_USERNAME:}
+    password: ${DIRECTIONAL_API_PASSWORD:}

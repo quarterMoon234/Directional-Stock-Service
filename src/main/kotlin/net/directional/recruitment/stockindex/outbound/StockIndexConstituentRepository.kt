@@ -6,4 +6,5 @@ interface StockIndexConstituentRepository : JpaRepository<StockIndexConstituentE
     fun countByStockIndexId(stockIndexId: Long): Long
     fun deleteByStockIndexId(stockIndexId: Long)
     fun findAllByStockIndexIdIn(stockIndexIds: List<Long>): List<StockIndexConstituentEntity>
+    fun findAllByStockIndexId(stockIndexId: Long): List<StockIndexConstituentEntity>
 }

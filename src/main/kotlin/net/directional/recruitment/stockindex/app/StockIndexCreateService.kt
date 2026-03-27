@@ -2,10 +2,7 @@ package net.directional.recruitment.stockindex.app
 
 import net.directional.recruitment.stock.outbound.StockRepository
 import net.directional.recruitment.stockindex.inbound.CreateStockIndexResponse
-import net.directional.recruitment.stockindex.outbound.StockIndexConstituentEntity
-import net.directional.recruitment.stockindex.outbound.StockIndexConstituentRepository
-import net.directional.recruitment.stockindex.outbound.StockIndexEntity
-import net.directional.recruitment.stockindex.outbound.StockIndexRepository
+import net.directional.recruitment.stockindex.outbound.*
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +14,8 @@ import java.time.LocalDate
 class StockIndexCreateService (
     private val stockIndexRepository: StockIndexRepository,
     private val stockIndexConstituentRepository: StockIndexConstituentRepository,
-    private val stockRepository : StockRepository
+    private val stockRepository : StockRepository,
+    private val priceApiClient: PriceApiClient
 ) {
     @Transactional
     fun create(command: CreateStockIndexCommand): CreateStockIndexResponse {
@@ -39,9 +37,8 @@ class StockIndexCreateService (
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "stockShortCodes must not be empty")
         }
 
-        val existingStockCodes = stockRepository.findAllById((stockShortCodes))
-            .map { it.shortCode }
-            .toSet()
+        val stocks = stockRepository.findAllById(stockShortCodes)
+        val existingStockCodes = stocks.map { it.shortCode }.toSet()
 
         val missingStockCodes = stockShortCodes.filterNot(existingStockCodes::contains)
         if (missingStockCodes.isNotEmpty()) {
@@ -51,13 +48,34 @@ class StockIndexCreateService (
             )
         }
 
+        val pricesByTicker = priceApiClient.getPrices()
+            .associateBy { it.ticker }
+
+        val missingPrices = stockShortCodes.filterNot(pricesByTicker::containsKey)
+        if (missingPrices.isNotEmpty()) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "prices not found: ${missingPrices.joinToString(",")}",
+            )
+        }
+
+        val baseMarketCap = stocks.fold(BigDecimal.ZERO) { acc, stock ->
+            val price = pricesByTicker[stock.shortCode]
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "price not found: ${stock.shortCode}",
+                )
+
+            acc + BigDecimal.valueOf(price.open) * BigDecimal.valueOf(stock.listedShares)
+        }
+
         val stockIndex = stockIndexRepository.save(
             StockIndexEntity(
                 name = name,
                 nameEn = nameEn,
                 baseDate = LocalDate.now(),
                 baseIndex = command.baseIndex,
-                baseMarketCap = BigDecimal.ZERO,
+                baseMarketCap = baseMarketCap,
             ),
         )
 

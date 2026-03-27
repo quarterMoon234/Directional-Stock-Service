@@ -1,28 +1,23 @@
 package net.directional.recruitment.stockindex.inbound
 
-import net.directional.recruitment.stockindex.app.SortDirection
-import net.directional.recruitment.stockindex.app.StockIndexCreateService
-import net.directional.recruitment.stockindex.app.StockIndexDeleteService
-import net.directional.recruitment.stockindex.app.StockIndexQueryCondition
-import net.directional.recruitment.stockindex.app.StockIndexQueryService
-import net.directional.recruitment.stockindex.app.StockIndexSortBy
-import net.directional.recruitment.stockindex.app.StockIndexUpdateService
+import net.directional.recruitment.stockindex.app.*
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/stock-indices")
-class StockIndexController (
+class StockIndexController(
     private val stockIndexCreateService: StockIndexCreateService,
     private val stockIndexQueryService: StockIndexQueryService,
     private val stockIndexUpdateService: StockIndexUpdateService,
-    private val stockIndexDeleteService: StockIndexDeleteService
+    private val stockIndexDeleteService: StockIndexDeleteService,
+    private val stockIndexPriceQueryService: StockIndexPriceQueryService,
 ) {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     fun createStockIndex(
         @RequestBody request: CreateStockIndexRequest
-    ) : CreateStockIndexResponse =
+    ): CreateStockIndexResponse =
         stockIndexCreateService.create(request.toCommand())
 
     @GetMapping
@@ -53,4 +48,18 @@ class StockIndexController (
     ) {
         stockIndexDeleteService.delete(id)
     }
+
+    @GetMapping("/prices")
+    fun getStockIndexPrices(
+        @RequestParam(required = false) search: String?,
+        @RequestParam(defaultValue = "NAME") sortBy: StockIndexPriceSortBy,
+        @RequestParam(defaultValue = "ASC") sortDirection: SortDirection,
+    ): List<StockIndexPriceResponse> =
+        stockIndexPriceQueryService.getStockIndexPrices(
+            StockIndexPriceQueryCondition(
+                search = search,
+                sortBy = sortBy,
+                sortDirection = sortDirection,
+            ),
+        )
 }
