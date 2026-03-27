@@ -8,8 +8,7 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "stock")
-class StockJpaEntity(
-
+class StockEntity(
     @Id
     @Column(name = "short_code", nullable = false, length = 6)
     var shortCode: String = "",
@@ -46,5 +45,4 @@ class StockJpaEntity(
 
     @Column(name = "listed_shares", nullable = false)
     var listedShares: Long = 0,
-
-    )
+)

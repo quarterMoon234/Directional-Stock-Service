@@ -1,6 +1,6 @@
 package net.directional.recruitment.stock.inbound
 
-import net.directional.recruitment.stock.domain.Stock
+import net.directional.recruitment.stock.outbound.StockEntity
 import java.time.LocalDate
 
 data class StockResponse(
@@ -18,7 +18,7 @@ data class StockResponse(
     val listedShares: Long,
 ) {
     companion object {
-        fun from(stock: Stock): StockResponse =
+        fun from(stock: StockEntity): StockResponse =
             StockResponse(
                 shortCode = stock.shortCode,
                 standardCode = stock.standardCode,

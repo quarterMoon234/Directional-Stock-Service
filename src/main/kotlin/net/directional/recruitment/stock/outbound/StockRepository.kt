@@ -2,4 +2,6 @@ package net.directional.recruitment.stock.outbound
 
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface StockJpaRepository : JpaRepository<StockJpaEntity, String>
+interface StockRepository :
+    JpaRepository<StockEntity, String>,
+    StockQueryRepository
